@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html style="height: 90%">
+   <head>
+       <meta charset="utf-8">
+       <script src="libs/echarts.min.js"></script>
+       <script src="https://d3js.org/d3.v6.min.js"></script>
+       <title>
+           Echart Tree 
+    
+       </title>
+   </head>
+   <body style="height: 90%; margin: 0">
+       <div id="container" style="height: 100%"></div>
+       <script type="text/javascript">
+
+let data=[
+        {"parentColumn": "",  "childColumn":"A-200"},
+        {"parentColumn": "A-200", "childColumn":"B-80"},
+        {"parentColumn": "A-200", "childColumn":"C-120"},
+        {"parentColumn": "B-80", "childColumn":"D-30","val":30},
+        {"parentColumn": "B-80", "childColumn":"E-50","val":50},
+        {"parentColumn": "C-120", "childColumn":"F-20","val":20},
+        {"parentColumn": "C-120", "childColumn":"G-40","val":40},
+        {"parentColumn": "C-120", "childColumn":"H-60","val":60}
+    ]
+
+    let stratify_function = d3.stratify()
+        .id(v => v["childColumn"])
+        .parentId(v => v["parentColumn"])
+
+    let data_formatted = stratify_function(data)
+
+    function convert(v) {
+        if (v.children === undefined) {
+            return {"name": v.id, "value": v.data.val}
+        } else {
+            let children = []
+            for (let b in v.children) {
+                children[b] = convert(v.children[b]);
+            }
+            return {"name": v.id, "children": children}
+        }
+    }
+    let coData = [convert(data_formatted)];
+    let dom = document.getElementById("container"); 
+    let treeMap = echarts.init(dom); 
+    treeMap.setOption({            
+        series: [
+            {
+                type: 'treemap', 
+                data: coData,     
+                label: {       
+                    show: true,
+                    format: '{b}'
+                },
+                itemStyle:{
+                    normal: {
+                        borderWidth: 8,
+                        borderColor: 'blue',
+                    }
+                },
+
+                levels: [
+                    {
+                        itemStyle: {
+                            borderWidth: 5,
+                            borderColor: 'blue',
+                    
+                        }
+                    },
+
+                    {
+                        color: ['magenta', 'cyan'],
+                        colorMappingBy: 'value'
+                    }
+                ]
+            }
+        ]
+    },true)
+
+       </script>
+   </body>
+</html>
